@@ -375,12 +375,6 @@ int main()
 	get_timebase_multiplier();
 
 	printf("Uncontended\n");
-	TIME(do_semop(NR_LOOPS), "semop")
-	TIME(do_sem_wait(NR_LOOPS), "sem_wait")
-	TIME(do_pthread_mutex(NR_LOOPS), "pthread_mutex")
-#ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
-	TIME(do_gcc_atomic_builtin(NR_LOOPS), "gcc_atomic_builtin")
-#endif
 #ifdef __PPC__
 	TIME(do_spin_lock(NR_LOOPS), "spin_lock")
 	TIME(do_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock")
@@ -388,24 +382,6 @@ int main()
 #endif
 
 	printf("\nUncontended threaded\n");
-
-	thread_func = do_semop;
-	setup_threads(nr_threads, NR_LOOPS);
-	TIME(do_threads(nr_threads), "semop")
-
-	thread_func = do_sem_wait;
-	setup_threads(nr_threads, NR_LOOPS);
-	TIME(do_threads(nr_threads), "sem_wait")
-
-	thread_func = do_pthread_mutex;
-	setup_threads(nr_threads, NR_LOOPS);
-	TIME(do_threads(nr_threads), "pthread_mutex")
-
-#ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
-	thread_func = do_gcc_atomic_builtin;
-	setup_threads(nr_threads, NR_LOOPS);
-	TIME(do_threads(nr_threads), "gcc_atomic_builtin")
-#endif
 
 #ifdef __PPC__
 	thread_func = do_spin_lock;
