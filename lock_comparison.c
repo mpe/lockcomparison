@@ -168,7 +168,7 @@ static void inline spin_unlock(unsigned int *lock)
 	*lock = 0;
 }
 
-void do_low_level_lock(unsigned long nr)
+void do_spin_lock(unsigned long nr)
 {
 	unsigned int lock = 0;
 	unsigned long i;
@@ -179,7 +179,7 @@ void do_low_level_lock(unsigned long nr)
 	}
 }
 #else
-#warning Implement low_level_lock
+#warning Implement do_spin_lock
 #endif
 
 int thread_started;
@@ -310,7 +310,7 @@ int main()
 	TIME(do_gcc_atomic_builtin(NR_LOOPS), "gcc_atomic_builtin")
 #endif
 #ifdef __PPC__
-	TIME(do_low_level_lock(NR_LOOPS), "low_level_lock")
+	TIME(do_spin_lock(NR_LOOPS), "spin_lock")
 #endif
 
 	printf("\nUncontended threaded\n");
@@ -334,9 +334,9 @@ int main()
 #endif
 
 #ifdef __PPC__
-	thread_func = do_low_level_lock;
+	thread_func = do_spin_lock;
 	setup_threads(nr_threads, NR_LOOPS);
-	TIME(do_threads(nr_threads), "low_level_lock")
+	TIME(do_threads(nr_threads), "spin_lock")
 #endif
 
 	return 0;
