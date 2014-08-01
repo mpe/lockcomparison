@@ -178,8 +178,44 @@ void do_spin_lock(unsigned long nr)
 		spin_unlock(&lock);
 	}
 }
+
+static inline unsigned long spin_lwsync_trylock(unsigned int *lock)
+{
+	unsigned long tmp, token;
+
+	token = 1;
+	asm volatile(
+"1:	lwarx	%0,0,%2\n\
+	cmpwi	0,%0,0\n\
+	bne-	2f\n\
+	stwcx.	%1,0,%2\n\
+	bne-	1b\n\
+	lwsync\n\
+2:"	: "=&r" (tmp)
+	: "r" (token), "r" (lock)
+	: "cr0", "memory");
+
+	return tmp;
+}
+
+static void inline spin_lwsync_lock(unsigned int *lock)
+{
+	while (spin_lwsync_trylock(lock))
+		;
+}
+
+void do_spin_lwsync_lock(unsigned long nr)
+{
+	unsigned int lock = 0;
+	unsigned long i;
+
+	for (i = 0; i < nr; i++) {
+		spin_lwsync_lock(&lock);
+		spin_unlock(&lock);
+	}
+}
 #else
-#warning Implement do_spin_lock
+#warning Implement do_spin_lwsync_lock
 #endif
 
 int thread_started;
@@ -311,6 +347,7 @@ int main()
 #endif
 #ifdef __PPC__
 	TIME(do_spin_lock(NR_LOOPS), "spin_lock")
+	TIME(do_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock")
 #endif
 
 	printf("\nUncontended threaded\n");
@@ -337,6 +374,10 @@ int main()
 	thread_func = do_spin_lock;
 	setup_threads(nr_threads, NR_LOOPS);
 	TIME(do_threads(nr_threads), "spin_lock")
+
+	thread_func = do_spin_lwsync_lock;
+	setup_threads(nr_threads, NR_LOOPS);
+	TIME(do_threads(nr_threads), "spin_lwsync_lock")
 #endif
 
 	return 0;
