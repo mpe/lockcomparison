@@ -143,7 +143,7 @@ static inline unsigned long spin_trylock(unsigned int *lock)
 
 	token = 1;
 	asm volatile(
-"1:	lwarx	%0,0,%2\n\
+"1:	lwarx	%0,0,%2,1\n\
 	cmpwi	0,%0,0\n\
 	bne-	2f\n\
 	stwcx.	%1,0,%2\n\
@@ -185,7 +185,7 @@ static inline unsigned long spin_lwsync_trylock(unsigned int *lock)
 
 	token = 1;
 	asm volatile(
-"1:	lwarx	%0,0,%2\n\
+"1:	lwarx	%0,0,%2,1\n\
 	cmpwi	0,%0,0\n\
 	bne-	2f\n\
 	stwcx.	%1,0,%2\n\
@@ -221,7 +221,7 @@ static inline unsigned long spin_sync_trylock(unsigned int *lock)
 
 	token = 1;
 	asm volatile(
-"1:	lwarx	%0,0,%2\n\
+"1:	lwarx	%0,0,%2,1\n\
 	cmpwi	0,%0,0\n\
 	bne-	2f\n\
 	stwcx.	%1,0,%2\n\
