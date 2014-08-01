@@ -15,6 +15,8 @@
 #define NR_LOOPS 10000
 
 #define _XOPEN_SOURCE 600
+#define _GNU_SOURCE
+
 #include <semaphore.h>
 
 #include <pthread.h>
@@ -30,6 +32,8 @@
 #include <sys/sem.h>
 
 #include <sys/syscall.h>
+#include <unistd.h>
+
 #define gettid() syscall(__NR_gettid);
 
 union semun {
