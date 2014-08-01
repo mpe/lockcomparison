@@ -12,7 +12,7 @@
  * 2 of the License, or (at your option) any later version.
  */
 
-#define NR_LOOPS 10000
+#define NR_LOOPS 10000000
 
 #define _XOPEN_SOURCE 600
 #define _GNU_SOURCE
