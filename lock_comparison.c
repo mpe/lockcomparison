@@ -386,15 +386,15 @@ int main()
 #ifdef __PPC__
 	thread_func = do_spin_lock;
 	setup_threads(nr_threads, NR_LOOPS);
-	TIME(do_threads(nr_threads), "spin_lock")
+	TIME(do_threads(nr_threads), "threaded-spin_lock")
 
 	thread_func = do_spin_lwsync_lock;
 	setup_threads(nr_threads, NR_LOOPS);
-	TIME(do_threads(nr_threads), "spin_lwsync_lock")
+	TIME(do_threads(nr_threads), "threaded-spin_lwsync_lock")
 
 	thread_func = do_spin_sync_lock;
 	setup_threads(nr_threads, NR_LOOPS);
-	TIME(do_threads(nr_threads), "spin_sync_lock")
+	TIME(do_threads(nr_threads), "threaded-spin_sync_lock")
 #endif
 
 	return 0;
