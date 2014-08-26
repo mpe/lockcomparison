@@ -1,5 +1,4 @@
 CFLAGS = -Wall -O2
-LDLIBS = -lpthread
 
 all: lock_comparison
 
