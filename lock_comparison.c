@@ -20,7 +20,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-static inline unsigned long spin_trylock(unsigned int *lock)
+
+static void inline spin_unlock(unsigned int *lock)
+{
+	asm volatile("lwsync":::"memory");
+	*lock = 0;
+}
+
+static inline unsigned long spin_isync_trylock(unsigned int *lock)
 {
 	unsigned long tmp, token;
 
@@ -39,25 +46,19 @@ static inline unsigned long spin_trylock(unsigned int *lock)
 	return tmp;
 }
 
-static void inline spin_lock(unsigned int *lock)
+static void inline spin_isync_lock(unsigned int *lock)
 {
-	while (spin_trylock(lock))
+	while (spin_isync_trylock(lock))
 		;
 }
 
-static void inline spin_unlock(unsigned int *lock)
-{
-	asm volatile("lwsync":::"memory");
-	*lock = 0;
-}
-
-void do_spin_lock(unsigned long nr)
+void test_spin_isync_lock(unsigned long nr)
 {
 	unsigned int lock = 0;
 	unsigned long i;
 
 	for (i = 0; i < nr; i++) {
-		spin_lock(&lock);
+		spin_isync_lock(&lock);
 		spin_unlock(&lock);
 	}
 }
@@ -87,7 +88,7 @@ static void inline spin_lwsync_lock(unsigned int *lock)
 		;
 }
 
-void do_spin_lwsync_lock(unsigned long nr)
+void test_spin_lwsync_lock(unsigned long nr)
 {
 	unsigned int lock = 0;
 	unsigned long i;
@@ -123,7 +124,7 @@ static void inline spin_sync_lock(unsigned int *lock)
 		;
 }
 
-void do_spin_sync_lock(unsigned long nr)
+void test_spin_sync_lock(unsigned long nr)
 {
 	unsigned int lock = 0;
 	unsigned long i;
@@ -149,14 +150,14 @@ int main()
 
 	asm volatile("mfspr %0, 0x11f" : "=r" (pvr));
 
-	TIME(do_spin_lock(NR_LOOPS), "spin_lock")
-	TIME(do_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock")
-	TIME(do_spin_sync_lock(NR_LOOPS), "spin_sync_lock")
+	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock")
+	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock")
+	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock")
 
 	/* And again in reverse order */
-	TIME(do_spin_sync_lock(NR_LOOPS), "spin_sync_lock")
-	TIME(do_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock")
-	TIME(do_spin_lock(NR_LOOPS), "spin_lock")
+	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock")
+	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock")
+	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock")
 
 	return 0;
 }
