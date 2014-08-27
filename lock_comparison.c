@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 
 static void inline spin_unlock(unsigned int *lock)
@@ -137,7 +138,7 @@ void test_spin_sync_lock(unsigned long nr)
 	clock_gettime(CLOCK_REALTIME, &start); \
 	job; \
 	clock_gettime(CLOCK_REALTIME, &end); \
-	printf("0x%lx " name "\t\t%12.2f ns\n", pvr, \
+	printf("%s,0x%lx," name ",%12.2f ns\n", hostname, pvr, \
 		(float)((end.tv_sec  - start.tv_sec) * 1000000000UL + \
 		(end.tv_nsec - start.tv_nsec)));
 
@@ -145,8 +146,11 @@ int main()
 {
 	struct timespec start, end;
 	unsigned long pvr;
+	char hostname[64];
 
 	asm volatile("mfspr %0, 0x11f" : "=r" (pvr));
+
+	gethostname(hostname, sizeof(hostname));
 
 	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock")
 	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock")
