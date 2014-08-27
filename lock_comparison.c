@@ -138,8 +138,8 @@ void test_spin_sync_lock(unsigned long nr)
 	clock_gettime(CLOCK_REALTIME, &start); \
 	job; \
 	clock_gettime(CLOCK_REALTIME, &end); \
-	printf("%s,0x%lx," name ",%12.2f ns\n", hostname, pvr, \
-		(float)((end.tv_sec  - start.tv_sec) * 1000000000UL + \
+	printf("%s,0x%lx," name ",%1lu\n", hostname, pvr, \
+		((end.tv_sec  - start.tv_sec) * 1000000000UL + \
 		(end.tv_nsec - start.tv_nsec)));
 
 int main()
