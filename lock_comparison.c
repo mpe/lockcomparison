@@ -152,14 +152,31 @@ int main()
 
 	gethostname(hostname, sizeof(hostname));
 
-	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock")
-	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock")
-	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock")
+	/* Test all possible permutations */
 
-	/* And again in reverse order */
-	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock")
-	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock")
-	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock")
+	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock");
+	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock");
+	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock");
+
+	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock");
+	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock");
+	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock");
+
+	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock");
+	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock");
+	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock");
+
+	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock");
+	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock");
+	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock");
+
+	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock");
+	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock");
+	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock");
+
+	TIME(test_spin_sync_lock(NR_LOOPS), "spin_sync_lock");
+	TIME(test_spin_lwsync_lock(NR_LOOPS), "spin_lwsync_lock");
+	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock");
 
 	return 0;
 }
