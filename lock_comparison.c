@@ -152,6 +152,12 @@ int main()
 
 	gethostname(hostname, sizeof(hostname));
 
+	/* Get warmed up */
+
+	test_spin_isync_lock(NR_LOOPS);
+	test_spin_lwsync_lock(NR_LOOPS);
+	test_spin_sync_lock(NR_LOOPS);
+
 	/* Test all possible permutations */
 
 	TIME(test_spin_isync_lock(NR_LOOPS), "spin_isync_lock");
