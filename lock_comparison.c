@@ -135,9 +135,9 @@ void test_spin_sync_lock(unsigned long nr)
 }
 
 #define TIME(job, name) \
-	clock_gettime(CLOCK_REALTIME, &start); \
+	clock_gettime(CLOCK_MONOTONIC, &start); \
 	job; \
-	clock_gettime(CLOCK_REALTIME, &end); \
+	clock_gettime(CLOCK_MONOTONIC, &end); \
 	printf("%s,0x%lx," name ",%1lu\n", hostname, pvr, \
 		((end.tv_sec  - start.tv_sec) * 1000000000UL + \
 		(end.tv_nsec - start.tv_nsec)));
