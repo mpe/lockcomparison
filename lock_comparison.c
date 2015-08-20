@@ -20,7 +20,7 @@
 #include <unistd.h>
 
 
-static void inline spin_unlock(unsigned int *lock)
+static void inline spin_lwsync_unlock(unsigned int *lock)
 {
 	asm volatile("lwsync":::"memory");
 	*lock = 0;
@@ -58,7 +58,7 @@ void test_spin_isync_lock(unsigned long nr)
 
 	for (i = 0; i < nr; i++) {
 		spin_isync_lock(&lock);
-		spin_unlock(&lock);
+		spin_lwsync_unlock(&lock);
 	}
 }
 
@@ -94,7 +94,7 @@ void test_spin_lwsync_lock(unsigned long nr)
 
 	for (i = 0; i < nr; i++) {
 		spin_lwsync_lock(&lock);
-		spin_unlock(&lock);
+		spin_lwsync_unlock(&lock);
 	}
 }
 
@@ -130,7 +130,7 @@ void test_spin_sync_lock(unsigned long nr)
 
 	for (i = 0; i < nr; i++) {
 		spin_sync_lock(&lock);
-		spin_unlock(&lock);
+		spin_lwsync_unlock(&lock);
 	}
 }
 
