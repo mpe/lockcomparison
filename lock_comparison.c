@@ -134,6 +134,23 @@ void test_spin_sync_lwsync(unsigned long nr)
 	}
 }
 
+static void inline spin_sync_unlock(unsigned int *lock)
+{
+	asm volatile("sync":::"memory");
+	*lock = 0;
+}
+
+void test_spin_sync_sync(unsigned long nr)
+{
+	unsigned int lock = 0;
+	unsigned long i;
+
+	for (i = 0; i < nr; i++) {
+		spin_sync_lock(&lock);
+		spin_sync_unlock(&lock);
+	}
+}
+
 #define TIME(job, name) \
 	clock_gettime(CLOCK_MONOTONIC, &start); \
 	job; \
@@ -157,29 +174,16 @@ int main()
 	test_spin_isync_lwsync(NR_LOOPS);
 	test_spin_lwsync_lwsync(NR_LOOPS);
 	test_spin_sync_lwsync(NR_LOOPS);
+	test_spin_sync_sync(NR_LOOPS);
 
-	/* Test all possible permutations */
+	/* Test forward and backward to hopefully avoid any artifacts */
 
 	TIME(test_spin_isync_lwsync(NR_LOOPS), "spin_isync_lwsync");
 	TIME(test_spin_lwsync_lwsync(NR_LOOPS), "spin_lwsync_lwsync");
 	TIME(test_spin_sync_lwsync(NR_LOOPS), "spin_sync_lwsync");
+	TIME(test_spin_sync_sync(NR_LOOPS), "spin_sync_sync");
 
-	TIME(test_spin_isync_lwsync(NR_LOOPS), "spin_isync_lwsync");
-	TIME(test_spin_sync_lwsync(NR_LOOPS), "spin_sync_lwsync");
-	TIME(test_spin_lwsync_lwsync(NR_LOOPS), "spin_lwsync_lwsync");
-
-	TIME(test_spin_lwsync_lwsync(NR_LOOPS), "spin_lwsync_lwsync");
-	TIME(test_spin_isync_lwsync(NR_LOOPS), "spin_isync_lwsync");
-	TIME(test_spin_sync_lwsync(NR_LOOPS), "spin_sync_lwsync");
-
-	TIME(test_spin_lwsync_lwsync(NR_LOOPS), "spin_lwsync_lwsync");
-	TIME(test_spin_sync_lwsync(NR_LOOPS), "spin_sync_lwsync");
-	TIME(test_spin_isync_lwsync(NR_LOOPS), "spin_isync_lwsync");
-
-	TIME(test_spin_sync_lwsync(NR_LOOPS), "spin_sync_lwsync");
-	TIME(test_spin_isync_lwsync(NR_LOOPS), "spin_isync_lwsync");
-	TIME(test_spin_lwsync_lwsync(NR_LOOPS), "spin_lwsync_lwsync");
-
+	TIME(test_spin_sync_sync(NR_LOOPS), "spin_sync_sync");
 	TIME(test_spin_sync_lwsync(NR_LOOPS), "spin_sync_lwsync");
 	TIME(test_spin_lwsync_lwsync(NR_LOOPS), "spin_lwsync_lwsync");
 	TIME(test_spin_isync_lwsync(NR_LOOPS), "spin_isync_lwsync");
