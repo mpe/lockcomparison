@@ -140,6 +140,17 @@ static void inline spin_sync_unlock(unsigned int *lock)
 	*lock = 0;
 }
 
+void test_spin_lwsync_sync(unsigned long nr)
+{
+	unsigned int lock = 0;
+	unsigned long i;
+
+	for (i = 0; i < nr; i++) {
+		spin_lwsync_lock(&lock);
+		spin_sync_unlock(&lock);
+	}
+}
+
 void test_spin_sync_sync(unsigned long nr)
 {
 	unsigned int lock = 0;

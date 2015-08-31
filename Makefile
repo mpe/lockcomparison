@@ -2,7 +2,8 @@ CFLAGS = -Wall -O2
 LDLIBS = -lrt
 
 PROGS := test_spin_sync_sync test_spin_isync_lwsync test_spin_lwsync_lwsync \
-	 test_spin_sync_lwsync test_spin_sync_sync test_spin_isync_sync
+	 test_spin_sync_lwsync test_spin_sync_sync test_spin_isync_sync \
+	 test_spin_lwsync_sync
 
 all: $(PROGS)
 
