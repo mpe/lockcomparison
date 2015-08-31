@@ -162,13 +162,8 @@ void test_spin_isync_sync(unsigned long nr)
 	}
 }
 
-#define TIME(job, name) \
-	clock_gettime(CLOCK_MONOTONIC, &start); \
-	job; \
-	clock_gettime(CLOCK_MONOTONIC, &end); \
-	printf("%s,0x%lx," name ",%1lu\n", hostname, pvr, \
-		((end.tv_sec  - start.tv_sec) * 1000000000UL + \
-		(end.tv_nsec - start.tv_nsec)));
+#define _str(s) #s
+#define str(s) _str(s)
 
 int main()
 {
@@ -181,26 +176,17 @@ int main()
 	gethostname(hostname, sizeof(hostname));
 
 	/* Get warmed up */
+	TEST_NAME(NR_LOOPS);
 
-	test_spin_isync_lwsync(NR_LOOPS);
-	test_spin_lwsync_lwsync(NR_LOOPS);
-	test_spin_sync_lwsync(NR_LOOPS);
-	test_spin_sync_sync(NR_LOOPS);
-	test_spin_isync_sync(NR_LOOPS);
+	clock_gettime(CLOCK_MONOTONIC, &start);
 
-	/* Test forward and backward to hopefully avoid any artifacts */
+	TEST_NAME(NR_LOOPS);
 
-	TIME(test_spin_isync_lwsync(NR_LOOPS), "spin_isync_lwsync");
-	TIME(test_spin_lwsync_lwsync(NR_LOOPS), "spin_lwsync_lwsync");
-	TIME(test_spin_sync_lwsync(NR_LOOPS), "spin_sync_lwsync");
-	TIME(test_spin_sync_sync(NR_LOOPS), "spin_sync_sync");
-	TIME(test_spin_isync_sync(NR_LOOPS), "spin_isync_sync");
+	clock_gettime(CLOCK_MONOTONIC, &end);
 
-	TIME(test_spin_isync_sync(NR_LOOPS), "spin_isync_sync");
-	TIME(test_spin_sync_sync(NR_LOOPS), "spin_sync_sync");
-	TIME(test_spin_sync_lwsync(NR_LOOPS), "spin_sync_lwsync");
-	TIME(test_spin_lwsync_lwsync(NR_LOOPS), "spin_lwsync_lwsync");
-	TIME(test_spin_isync_lwsync(NR_LOOPS), "spin_isync_lwsync");
+	printf("%s,0x%lx," str(TEST_NAME) ",%1lu\n", hostname, pvr,
+		((end.tv_sec  - start.tv_sec) * 1000000000UL + \
+		(end.tv_nsec - start.tv_nsec)));
 
 	return 0;
 }
