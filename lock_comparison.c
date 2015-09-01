@@ -24,62 +24,28 @@
 #define str(s) _str(s)
 
 
-static inline unsigned long spin_isync_trylock(unsigned int *lock)
-{
-	unsigned long tmp, token;
-
-	token = 1;
-	asm volatile(
-"1:	lwarx	%0,0,%2,1\n\
-	cmpwi	0,%0,0\n\
-	bne-	2f\n\
-	stwcx.	%1,0,%2\n\
-	bne-	1b\n\
-	isync\n\
-2:"	: "=&r" (tmp)
-	: "r" (token), "r" (lock)
-	: "cr0", "memory");
-
-	return tmp;
+#define DEF_TRYLOCK(type)				\
+static inline unsigned long				\
+spin_##type##_trylock(unsigned int *lock)		\
+{							\
+	unsigned long tmp, token;			\
+	token = 1;					\
+	asm volatile(					\
+"1:	lwarx	%0,0,%2,1\n"				\
+"	cmpwi	0,%0,0\n"				\
+"	bne-	2f\n"					\
+"	stwcx.	%1,0,%2\n"				\
+"	bne-	1b\n"					\
+	str(type) 					\
+"\n2:"	: "=&r" (tmp)					\
+	: "r" (token), "r" (lock)			\
+	: "cr0", "memory");				\
+	return tmp;				\
 }
 
-static inline unsigned long spin_lwsync_trylock(unsigned int *lock)
-{
-	unsigned long tmp, token;
-
-	token = 1;
-	asm volatile(
-"1:	lwarx	%0,0,%2,1\n\
-	cmpwi	0,%0,0\n\
-	bne-	2f\n\
-	stwcx.	%1,0,%2\n\
-	bne-	1b\n\
-	lwsync\n\
-2:"	: "=&r" (tmp)
-	: "r" (token), "r" (lock)
-	: "cr0", "memory");
-
-	return tmp;
-}
-
-static inline unsigned long spin_sync_trylock(unsigned int *lock)
-{
-	unsigned long tmp, token;
-
-	token = 1;
-	asm volatile(
-"1:	lwarx	%0,0,%2,1\n\
-	cmpwi	0,%0,0\n\
-	bne-	2f\n\
-	stwcx.	%1,0,%2\n\
-	bne-	1b\n\
-	sync\n\
-2:"	: "=&r" (tmp)
-	: "r" (token), "r" (lock)
-	: "cr0", "memory");
-
-	return tmp;
-}
+DEF_TRYLOCK(sync)
+DEF_TRYLOCK(isync)
+DEF_TRYLOCK(lwsync)
 
 #define DEF_LOCK(type)				\
 static inline void				\
