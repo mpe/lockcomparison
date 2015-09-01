@@ -24,6 +24,21 @@
 #define str(s) _str(s)
 
 
+/*
+ * For lock we can use sync, isync or lwsync.
+ *
+ * For unlock we can use sync or lwsync.
+ *
+ * So the possible combinations are:
+ *   sync   sync
+ *   sync   lwsync
+ *   isync  sync
+ *   isync  lwsync
+ *   lwsync sync
+ *   lwsync lwsync
+ *
+ */
+
 #define DEF_TRYLOCK(type)				\
 static inline unsigned long				\
 spin_##type##_trylock(unsigned int *lock)		\
