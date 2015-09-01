@@ -51,17 +51,6 @@ static void inline spin_isync_lock(unsigned int *lock)
 		;
 }
 
-void test_spin_isync_lwsync(unsigned long nr)
-{
-	unsigned int lock = 0;
-	unsigned long i;
-
-	for (i = 0; i < nr; i++) {
-		spin_isync_lock(&lock);
-		spin_lwsync_unlock(&lock);
-	}
-}
-
 static inline unsigned long spin_lwsync_trylock(unsigned int *lock)
 {
 	unsigned long tmp, token;
@@ -85,17 +74,6 @@ static void inline spin_lwsync_lock(unsigned int *lock)
 {
 	while (spin_lwsync_trylock(lock))
 		;
-}
-
-void test_spin_lwsync_lwsync(unsigned long nr)
-{
-	unsigned int lock = 0;
-	unsigned long i;
-
-	for (i = 0; i < nr; i++) {
-		spin_lwsync_lock(&lock);
-		spin_lwsync_unlock(&lock);
-	}
 }
 
 static inline unsigned long spin_sync_trylock(unsigned int *lock)
@@ -123,55 +101,31 @@ static void inline spin_sync_lock(unsigned int *lock)
 		;
 }
 
-void test_spin_sync_lwsync(unsigned long nr)
-{
-	unsigned int lock = 0;
-	unsigned long i;
-
-	for (i = 0; i < nr; i++) {
-		spin_sync_lock(&lock);
-		spin_lwsync_unlock(&lock);
-	}
-}
-
 static void inline spin_sync_unlock(unsigned int *lock)
 {
 	asm volatile("sync":::"memory");
 	*lock = 0;
 }
 
-void test_spin_lwsync_sync(unsigned long nr)
-{
-	unsigned int lock = 0;
-	unsigned long i;
-
-	for (i = 0; i < nr; i++) {
-		spin_lwsync_lock(&lock);
-		spin_sync_unlock(&lock);
-	}
+#define DEF_TEST(ltype, ultype)				\
+static inline void					\
+test_spin_##ltype##_##ultype(unsigned long nr)		\
+{							\
+	unsigned int lock = 0;				\
+	unsigned long i;				\
+							\
+	for (i = 0; i < nr; i++) {			\
+		spin_##ltype##_lock(&lock);		\
+		spin_##ultype##_unlock(&lock);		\
+	}						\
 }
 
-void test_spin_sync_sync(unsigned long nr)
-{
-	unsigned int lock = 0;
-	unsigned long i;
-
-	for (i = 0; i < nr; i++) {
-		spin_sync_lock(&lock);
-		spin_sync_unlock(&lock);
-	}
-}
-
-void test_spin_isync_sync(unsigned long nr)
-{
-	unsigned int lock = 0;
-	unsigned long i;
-
-	for (i = 0; i < nr; i++) {
-		spin_isync_lock(&lock);
-		spin_sync_unlock(&lock);
-	}
-}
+DEF_TEST(lwsync, lwsync)
+DEF_TEST(isync, lwsync)
+DEF_TEST(sync, lwsync)
+DEF_TEST(lwsync, sync)
+DEF_TEST(sync, sync)
+DEF_TEST(isync, sync)
 
 #define _str(s) #s
 #define str(s) _str(s)
