@@ -43,12 +43,6 @@ static inline unsigned long spin_isync_trylock(unsigned int *lock)
 	return tmp;
 }
 
-static void inline spin_isync_lock(unsigned int *lock)
-{
-	while (spin_isync_trylock(lock))
-		;
-}
-
 static inline unsigned long spin_lwsync_trylock(unsigned int *lock)
 {
 	unsigned long tmp, token;
@@ -66,12 +60,6 @@ static inline unsigned long spin_lwsync_trylock(unsigned int *lock)
 	: "cr0", "memory");
 
 	return tmp;
-}
-
-static void inline spin_lwsync_lock(unsigned int *lock)
-{
-	while (spin_lwsync_trylock(lock))
-		;
 }
 
 static inline unsigned long spin_sync_trylock(unsigned int *lock)
@@ -93,11 +81,17 @@ static inline unsigned long spin_sync_trylock(unsigned int *lock)
 	return tmp;
 }
 
-static void inline spin_sync_lock(unsigned int *lock)
-{
-	while (spin_sync_trylock(lock))
-		;
+#define DEF_LOCK(type)				\
+static inline void				\
+spin_##type##_lock(unsigned int *lock)		\
+{						\
+	while (spin_##type##_trylock(lock))	\
+		;				\
 }
+
+DEF_LOCK(sync)
+DEF_LOCK(isync)
+DEF_LOCK(lwsync)
 
 #define DEF_UNLOCK(type)			\
 static inline void				\
