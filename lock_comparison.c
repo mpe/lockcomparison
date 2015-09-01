@@ -20,11 +20,9 @@
 #include <unistd.h>
 
 
-static void inline spin_lwsync_unlock(unsigned int *lock)
-{
-	asm volatile("lwsync":::"memory");
-	*lock = 0;
-}
+#define _str(s) #s
+#define str(s) _str(s)
+
 
 static inline unsigned long spin_isync_trylock(unsigned int *lock)
 {
@@ -101,11 +99,16 @@ static void inline spin_sync_lock(unsigned int *lock)
 		;
 }
 
-static void inline spin_sync_unlock(unsigned int *lock)
-{
-	asm volatile("sync":::"memory");
-	*lock = 0;
+#define DEF_UNLOCK(type)			\
+static inline void				\
+spin_##type##_unlock(unsigned int *lock)	\
+{						\
+	asm volatile(str(type):::"memory");	\
+	*lock = 0;				\
 }
+
+DEF_UNLOCK(sync)
+DEF_UNLOCK(lwsync)
 
 #define DEF_TEST(ltype, ultype)				\
 static inline void					\
@@ -126,9 +129,6 @@ DEF_TEST(sync, lwsync)
 DEF_TEST(lwsync, sync)
 DEF_TEST(sync, sync)
 DEF_TEST(isync, sync)
-
-#define _str(s) #s
-#define str(s) _str(s)
 
 int main()
 {
