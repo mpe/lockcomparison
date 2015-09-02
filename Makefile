@@ -1,4 +1,4 @@
-CFLAGS = -Wall -O2
+CFLAGS = -Wall -O2 -fno-stack-protector
 LDLIBS = -lrt
 
 PROGS := test_spin_sync_sync test_spin_isync_lwsync test_spin_lwsync_lwsync \
