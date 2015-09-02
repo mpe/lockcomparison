@@ -87,14 +87,13 @@ DEF_UNLOCK(lwsync)
 
 #define DEF_TEST(ltype, ultype)				\
 static inline void					\
-test_spin_##ltype##_##ultype(unsigned long nr)		\
+test_spin_##ltype##_##ultype(unsigned long nr, unsigned int *lock)	\
 {							\
-	unsigned int lock = 0;				\
 	unsigned long i;				\
 							\
 	for (i = 0; i < nr; i++) {			\
-		spin_##ltype##_lock(&lock);		\
-		spin_##ultype##_unlock(&lock);		\
+		spin_##ltype##_lock(lock);		\
+		spin_##ultype##_unlock(lock);		\
 	}						\
 }
 
@@ -104,6 +103,8 @@ DEF_TEST(sync, lwsync)
 DEF_TEST(lwsync, sync)
 DEF_TEST(sync, sync)
 DEF_TEST(isync, sync)
+
+static unsigned int the_lock = 0;
 
 int main()
 {
@@ -116,11 +117,11 @@ int main()
 	gethostname(hostname, sizeof(hostname));
 
 	/* Get warmed up */
-	TEST_NAME(NR_LOOPS);
+	TEST_NAME(NR_LOOPS, &the_lock);
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
 
-	TEST_NAME(NR_LOOPS);
+	TEST_NAME(NR_LOOPS, &the_lock);
 
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
