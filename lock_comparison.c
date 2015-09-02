@@ -14,6 +14,7 @@
 
 #define _GNU_SOURCE
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -62,10 +63,36 @@ DEF_TRYLOCK(sync)
 DEF_TRYLOCK(isync)
 DEF_TRYLOCK(lwsync)
 
+struct paca_struct {
+	uint8_t io_sync;
+};
+
+register struct paca_struct *local_paca asm("r14");
+
+#ifdef DO_SYNC_IO
+
+#define mb()   asm volatile ("sync" : : : "memory")
+#define get_paca()	local_paca
+#define unlikely(x)	__builtin_expect(!!(x), 0)
+
+#define CLEAR_IO_SYNC	(get_paca()->io_sync = 0)
+#define SYNC_IO	\
+	do {						\
+		if (unlikely(get_paca()->io_sync)) {	\
+			mb();				\
+			get_paca()->io_sync = 0;	\
+		}					\
+	} while (0)
+#else
+#define CLEAR_IO_SYNC
+#define SYNC_IO
+#endif
+
 #define DEF_LOCK(type)				\
 static inline void				\
 spin_##type##_lock(unsigned int *lock)		\
 {						\
+	CLEAR_IO_SYNC;				\
 	while (spin_##type##_trylock(lock))	\
 		;				\
 }
@@ -78,6 +105,7 @@ DEF_LOCK(lwsync)
 static inline void				\
 spin_##type##_unlock(unsigned int *lock)	\
 {						\
+	SYNC_IO;				\
 	asm volatile(str(type):::"memory");	\
 	*lock = 0;				\
 }
@@ -109,8 +137,12 @@ static unsigned int the_lock = 0;
 int main()
 {
 	struct timespec start, end;
+	struct paca_struct my_paca;
 	unsigned long pvr;
 	char hostname[64];
+
+	my_paca.io_sync = 0;
+	local_paca = &my_paca;
 
 	asm volatile("mfspr %0, 0x11f" : "=r" (pvr));
 
