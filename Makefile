@@ -9,12 +9,19 @@ test_spin_sync_lwsync: CFLAGS += -D DO_SYNC_IO
 test_spin_isync_lwsync: CFLAGS += -D DO_SYNC_IO
 test_spin_lwsync_lwsync: CFLAGS += -D DO_SYNC_IO
 
-all: $(PROGS)
+LSTS := $(subst test_,,$(addsuffix .lst,$(PROGS)))
+
+all: $(PROGS) $(LSTS)
 
 test_%: lock_comparison.c
 	$(CC) $(CFLAGS) -D TEST_NAME=$@ -o $@ $<
 
+%.lst: test_%
+	objdump -d $< > $@
+
 $(PROGS): lock_comparison.c
 
 clean:
-	rm -f  $(PROGS)
+	rm -f  $(PROGS) $(LSTS)
+
+.PHONY: all clean
