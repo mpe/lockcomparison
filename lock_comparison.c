@@ -10,7 +10,7 @@
  * 2 of the License, or (at your option) any later version.
  */
 
-#define NR_LOOPS 100000000
+#define NR_LOOPS 2000000000
 
 #define _GNU_SOURCE
 
@@ -149,7 +149,7 @@ int main()
 	gethostname(hostname, sizeof(hostname));
 
 	/* Get warmed up */
-	TEST_NAME(NR_LOOPS, &the_lock);
+	TEST_NAME(100000000, &the_lock);
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
 
