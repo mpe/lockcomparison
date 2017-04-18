@@ -72,6 +72,9 @@ register struct paca_struct *local_paca asm("r14");
 #define unlikely(x)	__builtin_expect(!!(x), 0)
 #define likely(x)	__builtin_expect(!!(x), 1)
 
+#define HMT_medium()	asm volatile("or 2,2,2		# medium priority")
+#define HMT_very_low()	asm volatile("or 31,31,31	# low priority")
+
 #define barrier()	asm volatile("" : : : "memory");
 
 #ifdef DO_SYNC_IO
