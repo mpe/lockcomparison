@@ -95,13 +95,19 @@ register struct paca_struct *local_paca asm("r14");
 #define SYNC_IO
 #endif
 
-#define DEF_LOCK(type)				\
-static inline void				\
-spin_##type##_lock(unsigned int *lock)		\
-{						\
-	CLEAR_IO_SYNC;				\
-	while (spin_##type##_trylock(lock))	\
-		;				\
+#define DEF_LOCK(type)						\
+void						\
+spin_##type##_lock(unsigned int *lock)				\
+{								\
+	CLEAR_IO_SYNC;						\
+	while (1) {						\
+		if (likely(spin_##type##_trylock(lock) == 0))	\
+			break;					\
+		HMT_very_low();					\
+		while (unlikely(*lock != 0))			\
+			barrier();				\
+		HMT_medium();					\
+	}							\
 }
 
 DEF_LOCK(sync)
