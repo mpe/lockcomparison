@@ -69,11 +69,12 @@ struct paca_struct {
 
 register struct paca_struct *local_paca asm("r14");
 
+#define unlikely(x)	__builtin_expect(!!(x), 0)
+#define likely(x)	__builtin_expect(!!(x), 1)
 #ifdef DO_SYNC_IO
 
 #define mb()   asm volatile ("sync" : : : "memory")
 #define get_paca()	local_paca
-#define unlikely(x)	__builtin_expect(!!(x), 0)
 
 #define CLEAR_IO_SYNC	(get_paca()->io_sync = 0)
 #define SYNC_IO	\
