@@ -13,6 +13,9 @@ LSTS := $(subst test_,,$(addsuffix .lst,$(PROGS)))
 
 all: $(PROGS) $(LSTS)
 
+test: all
+	run-parts --regex="test_spin_*" .
+
 test_%: lock_comparison.c
 	$(CC) $(CFLAGS) -D TEST_NAME=$@ -o $@ $<
 
