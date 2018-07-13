@@ -31,6 +31,8 @@
  * For unlock we can use sync or lwsync.
  *
  * So the possible combinations are:
+ *   Lock   Unlock
+ *   -------------
  *   sync   sync
  *   sync   lwsync
  *   isync  sync
@@ -38,6 +40,7 @@
  *   lwsync sync
  *   lwsync lwsync
  *
+ * Linux currently uses lwsync lwsync.
  */
 
 #define DEF_TRYLOCK(type)				\
