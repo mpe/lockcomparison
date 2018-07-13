@@ -164,6 +164,8 @@ int main()
 
 	gethostname(hostname, sizeof(hostname));
 
+	fprintf(stderr, "# Timing %d iterations, lower is better\n", NR_LOOPS);
+
 	/* Get warmed up */
 	TEST_NAME(100000000, &the_lock);
 
